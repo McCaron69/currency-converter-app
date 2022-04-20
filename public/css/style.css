@@ -1,0 +1,21 @@
+h1 {
+    color:red;
+}
+
+#mainContainer {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+#converterFormContainer {
+    width: 80%;
+    margin: 0 auto;
+}
+
+#converterValueInput {
+    width: 100%;
+}
+
+#converterSubmitBtn {
+    width: 100%;
+}
