@@ -3,36 +3,39 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Currency;
-use XMLReader;
+use App\Models\CurrencyRate;
+use App\Models\CurrencyName;
 
 class CurrencyController extends Controller
 {
+    public function getCurrenciesNames()
+    {
+        return CurrencyName::all();
+    }
     public function getActualCurrencies() {
         $yesterdayDate = date("Y-m-d", strtotime("yesterday"));
 
-        $this->parseCurrencyToDbByDate($yesterdayDate);
+        $this->parseExchangeRatesToDbByDate($yesterdayDate);
 
-        $actualCurrencies = Currency::where('rateDate', '=', $yesterdayDate)->get();
+        $actualCurrencies = CurrencyRate::where('rateDate', '=', $yesterdayDate)->get();
 
         return $actualCurrencies;
     }
 
-    public function parseCurrencyToDbByDate($date) {
-        if(!count(Currency::where('rateDate', '=', $date)->get())) {
-            $this->parseCurrencyFromEestiPankByDate($date);
-            $this->parseCurrencyFromLeeduPankByDate($date);
+    public function parseExchangeRatesToDbByDate($date) {
+        if(!count(CurrencyRate::where('rateDate', '=', $date)->get())) {
+            $this->parseExchangeRatesFromEestiPankByDate($date);
+            $this->parseExchangeRatesFromLeeduPankByDate($date);
         }
-        $this->parseCurrencyFromLeeduPankByDate($date);
     }
 
-    public function parseCurrencyFromEestiPankByDate($date)
+    public function parseExchangeRatesFromEestiPankByDate($date)
     {
         $reader = simplexml_load_file('https://haldus.eestipank.ee/et/export/currency_rates?imported=' . $date . '&type=xml');
 
         foreach ($reader->Cube->Cube->Cube as $currency) {
-            $currencyModel = new Currency();
-            $currencyModel->abbreviation = $currency['currency'];
+            $currencyModel = new CurrencyRate();
+            $currencyModel->currencyAbbreviation = $currency['currency'];
             $currencyModel->rateToEuro = $currency['rate'];
             $currencyModel->rateDate = $date;
             $currencyModel->rateSource = "Eesti Pank";
@@ -40,8 +43,22 @@ class CurrencyController extends Controller
         }
     }
 
-    public function parseCurrencyFromLeeduPankByDate($date)
+    public function parseExchangeRatesFromLeeduPankByDate($date)
     {
+        $currenciesString = file_get_contents('https://www.lb.lt/fxrates_csv.lb?tp=EU&rs=1&dte=' . $date);
+
+        $currenciesArray = explode("\n", $currenciesString);
+
+        foreach ($currenciesArray as $currencyData) {
+            $currencyDataArray = explode(',', $currencyData);
+
+            $currencyModel = new CurrencyRate();
+            $currencyModel->currencyAbbreviation = $currencyDataArray[1];
+            $currencyModel->rateToEuro = $currencyDataArray[2];
+            $currencyModel->rateDate = $date;
+            $currencyModel->rateSource = "Leedu Pank";
+            $currencyModel->save();
+        }
     }
 
     /**

@@ -12,4 +12,6 @@ class CurrencyName extends Model
     protected $table = 'currency_names';
 
     protected $primaryKey = 'abbreviation';
+
+    public $incrementing = false;
 }

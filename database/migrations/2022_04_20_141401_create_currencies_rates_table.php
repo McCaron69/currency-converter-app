@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -14,22 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('currencies', function (Blueprint $table) {
-            $table->string('abbreviation');
+        Schema::create('currencies_rates', function (Blueprint $table) {
+            $table->string('currencyAbbreviation');
             $table->unsignedDecimal('rateToEuro', $precision = 12, $scale = 4);
             $table->date('rateDate');
             $table->string('rateSource');
-            $table->foreign('abbreviation')->references('abbreviation')->on('currency_names');
+            $table->foreign('currencyAbbreviation')->references('abbreviation')->on('currency_names');
         });
-
-        // DB::table('currencies')->insert(
-        //     array(
-        //         'abbreviation' => 'RUB',
-        //         'rateToEuro' => 101.69,
-        //         'rateDate' => '2022-04-19',
-        //         'rateSource' => 'ME'
-        //         )
-        // );
     }
 
     /**
@@ -39,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('currencies');
+        Schema::dropIfExists('currencies_rates');
     }
 };

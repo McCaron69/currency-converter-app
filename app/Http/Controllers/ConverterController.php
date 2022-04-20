@@ -8,10 +8,12 @@ class ConverterController extends Controller
 {
     public function index() {
         $currencyController = new CurrencyController;
-        $actualCurrencies = $currencyController->getActualCurrencies();
+        $currenciesNames = $currencyController->getCurrenciesNames();
+
+        // dd($currenciesNames);
 
         return view('converter', [
-            'currencies' => $actualCurrencies
+            'currencies' => $currenciesNames
         ]);
     }
 }
