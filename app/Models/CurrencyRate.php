@@ -11,6 +11,8 @@ class CurrencyRate extends Model
 
     protected $table = 'currencies_rates';
 
+    protected $guarded = [];
+
     public $timestamps = false;
 
     public function currencyName() {

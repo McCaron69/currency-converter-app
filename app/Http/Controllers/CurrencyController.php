@@ -10,16 +10,66 @@ class CurrencyController extends Controller
 {
     public function getCurrenciesNames()
     {
-        return CurrencyName::all();
+        return CurrencyName::orderBy('name', 'asc')->get();
     }
-    public function getActualCurrencies() {
+
+    public function convertCurrency($fromCurrency, $toCurrency, $currencyAmount, $ratesDate)
+    {
+        $convertedResult = [
+            "Eesti Pank" => 
+                $this->convertCurrencyWithSpecifiedRateSource(
+                    $fromCurrency, $toCurrency, $currencyAmount, $ratesDate, "Eesti Pank"),
+            "Leedu Pank" => 
+                $this->convertCurrencyWithSpecifiedRateSource(
+                    $fromCurrency, $toCurrency, $currencyAmount, $ratesDate, "Leedu Pank")
+                ];
+                
+        return $convertedResult;
+    }
+
+    public function convertCurrencyWithSpecifiedRateSource($fromCurrency, $toCurrency, $currencyAmount, $ratesDate, $rateSource)
+    {
+        try {
+            $fromCurrencyData = $this->getCurrencyRateByDateAndSource($fromCurrency, $ratesDate, $rateSource);
+            $toCurrencyData = $this->getCurrencyRateByDateAndSource($toCurrency, $ratesDate, $rateSource);
+            
+            return $currencyAmount / $fromCurrencyData->rateToEuro * $toCurrencyData->rateToEuro;
+        } catch (\Throwable $th) {
+            return "No data";
+        }
+    }
+
+    public function getCurrencyRateByDateAndSource($currency, $rateDate, $rateSource)
+    {
+        if(!strcmp($currency, "EUR")) {
+            return $this->getEuroCurrencyRate();
+        }
+
+        $this->parseExchangeRatesToDbByDate($rateDate);
+
+        return CurrencyRate::where([
+            ['currencyAbbreviation', '=', $currency],
+            ['rateDate', '=', $rateDate],
+            ['rateSource', '=', $rateSource]
+        ])->first();
+    }
+
+    public function getEuroCurrencyRate()
+    {
+        $euroCurrencyRate = new CurrencyRate();
+
+        $euroCurrencyRate->currencyAbbreviation = "EUR";
+        $euroCurrencyRate->rateToEuro = 1.00;
+        $euroCurrencyRate->rateDate = date("Y-m-d", strtotime("yesterday"));
+        $euroCurrencyRate->rateSource = "Eesti Pank";
+
+        return $euroCurrencyRate;
+    }
+
+    public function parseActualCurrenciesExchangeRates() {
         $yesterdayDate = date("Y-m-d", strtotime("yesterday"));
 
         $this->parseExchangeRatesToDbByDate($yesterdayDate);
-
-        $actualCurrencies = CurrencyRate::where('rateDate', '=', $yesterdayDate)->get();
-
-        return $actualCurrencies;
     }
 
     public function parseExchangeRatesToDbByDate($date) {

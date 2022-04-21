@@ -28,6 +28,7 @@ return new class extends Migration
             'CNY' => 'Chinese Yuan',
             'CZK' => 'Czech Koruna',
             'DKK' => 'Danish Krone',
+            'EUR' => 'Euro',
             'GBP' => 'British Pound Sterling',
             'HKD' => 'Hong Kong Dollar',
             'HRK' => 'Croatian Kuna',
