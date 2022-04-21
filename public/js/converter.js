@@ -14,7 +14,7 @@ $("#converterSubmitBtn").click(function() {
       var resultsTable = '<table id="ratesTable">';
       for (var key in result) {
         if (result.hasOwnProperty(key)) {
-          resultsTable += '<tr><td>' + key +'</td><td>' + result[key].toFixed(4) +'</td></tr>';
+          resultsTable += '<tr><td>' + key +'</td><td>' + result[key] +'</td></tr>';
         }
       }
       resultsTable += "</table>";

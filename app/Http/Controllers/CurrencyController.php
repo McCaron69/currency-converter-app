@@ -23,7 +23,7 @@ class CurrencyController extends Controller
                 $this->convertCurrencyWithSpecifiedRateSource(
                     $fromCurrency, $toCurrency, $currencyAmount, $ratesDate, "Leedu Pank")
                 ];
-                
+
         return $convertedResult;
     }
 
@@ -33,7 +33,7 @@ class CurrencyController extends Controller
             $fromCurrencyData = $this->getCurrencyRateByDateAndSource($fromCurrency, $ratesDate, $rateSource);
             $toCurrencyData = $this->getCurrencyRateByDateAndSource($toCurrency, $ratesDate, $rateSource);
             
-            return $currencyAmount / $fromCurrencyData->rateToEuro * $toCurrencyData->rateToEuro;
+            return number_format(($currencyAmount / $fromCurrencyData->rateToEuro * $toCurrencyData->rateToEuro), 4);
         } catch (\Throwable $th) {
             return "No data";
         }
